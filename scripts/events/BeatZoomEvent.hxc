@@ -1,0 +1,44 @@
+import funkin.play.PlayState;
+import funkin.Conductor;
+import flixel.FlxG;
+import funkin.play.event.ScriptedSongEvent;
+
+//CODE BY BIT https://www.youtube.com/@mq-bit - https://gamebanana.com/members/4724027
+
+class BeatZoomEvent extends ScriptedSongEvent {
+
+    function new() { super("BeatZoom"); }
+    public override function getTitle():String { return "Beat Zoom"; }
+
+    override function handleEvent(data) {
+        if(PlayState.instance == null) return;
+
+        var enabled = data.getBool('v1');
+        var gameAdd:Float = data.getFloat('v2') ?? 0.0;
+        var hudAdd:Float = data.getFloat('v3') ?? 0.0;
+        var rate:Float = data.getFloat('v4') ?? 1.0;
+        var offset:Float = data.getFloat('v5') ?? 0.0;
+        if (enabled) {
+            PlayState.instance.cameraBopIntensity = (Constants.DEFAULT_BOP_INTENSITY) + gameAdd;
+            PlayState.instance.hudCameraZoomIntensity = (Constants.DEFAULT_BOP_INTENSITY - 1.0) + hudAdd;
+            PlayState.instance.cameraZoomRate = rate;
+            PlayState.instance.cameraZoomRateOffset = offset;
+        } else {
+            PlayState.instance.cameraBopIntensity = Constants.DEFAULT_BOP_INTENSITY;
+            PlayState.instance.hudCameraZoomIntensity = Constants.DEFAULT_BOP_INTENSITY - 1.0;
+            PlayState.instance.cameraZoomRate = Constants.DEFAULT_ZOOM_RATE;
+            PlayState.instance.cameraZoomRateOffset = Constants.DEFAULT_ZOOM_OFFSET;
+        }
+    }
+
+
+    override function getEventSchema() {
+        return [
+            { name:'v1', title:'Enabled', defaultValue:true, type:"bool"},
+            { name:'v2', title:'Game Intensity (Additive)', defaultValue:0.0, min:-2.0, max:5.0, step:0.05, type:"float", units:'+x' },
+            { name:'v3', title:'HUD Intensity (Additive)', defaultValue:0.0, min:-2.0, max:5.0, step:0.05, type:"float", units:'+x' },
+            { name:'v4', title:'Rate', defaultValue:1.0, min:0, step:0.25, type:"float", units:'beats/zoom' },
+            { name:'v5', title:'Offset', defaultValue:0.0, step:0.25, type:"float", units:'beats' }
+        ];
+    }
+}

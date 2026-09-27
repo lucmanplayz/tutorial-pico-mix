@@ -1,0 +1,274 @@
+    import flixel.FlxG;
+    import flixel.FlxSprite;
+    import flixel.addons.display.FlxRuntimeShader;
+    import funkin.graphics.FunkinSprite;
+    import funkin.Conductor;
+    import funkin.play.PlayState;
+    import funkin.play.song.Song;
+    import funkin.graphics.shaders.AdjustColorShader;
+    import flixel.tweens.FlxTween;
+    import flixel.tweens.misc.ColorTween;
+    import flixel.util.FlxColor;
+    import flixel.tweens.FlxEase;
+    import funkin.play.Countdown;
+    import flixel.util.FlxTimer;
+    import openfl.filters.ShaderFilter;
+    import openfl.display.BlendMode;
+    import Reflect;
+    import openfl.Assets;
+
+    class TutorialPicoMixEX extends Song {
+
+        var saturation:Float = 0;
+        var depth:Float = 0;
+        var effect:Float = 0;
+        var strength:Float = 0;
+        var HUDPP:Array<String> = ['healthBar', 'healthBarBG', 'scoreText', 'iconP1', 'iconP2'];
+
+        public function new() { super('tutorial-pico-mix-extended'); }
+
+        function onCreate(event) {
+            super.onCreate(event);
+            
+            ps = PlayState.instance;
+
+            black = new FunkinSprite(0, 0);
+            black.makeSolidColor(4000, 2000, 0xFF000000);
+            black.cameras = [PlayState.instance.camCutscene];
+            black.screenCenter();
+            PlayState.instance.add(black);
+
+            old = new FlxRuntimeShader(Assets.getText(Paths.frag("oldeffect")));
+            oldFilter = new ShaderFilter(old);
+
+            bloom = new FlxRuntimeShader(Assets.getText(Paths.frag("bloom")));
+            bloom.setFloat("effect", 0);
+            bloom.setFloat("strength", 0);
+            bloom.setFloat("contrast", 1);
+            bloom.setFloat("brightness", 0);
+            bloomFilter = new ShaderFilter(bloom);
+
+            noth = new FlxRuntimeShader(Assets.getText(Paths.frag("noth")));
+            nothFilter = new ShaderFilter(noth);
+
+            for (item in HUDPP)
+            {
+                var obj = Reflect.field(ps, item);
+                if (obj != null) { obj.alpha = 0; }
+            }
+
+            #if !mobile
+            final amplification:Float = (FlxG.width / FlxG.height) / (FlxG.initialWidth / FlxG.initialHeight);
+            ps.opponentStrumline.enterMiniMode(0.4 * amplification);
+            ps.playerStrumline.alpha = 0;
+            ps.opponentStrumline.alpha = 0;
+            ps.playerStrumline.visible = false;
+            ps.opponentStrumline.visible = false;
+            #end
+            
+            #if !mobile
+            ps.camGame.filters = [oldFilter, bloomFilter];
+            ps.camHUD.filters = [oldFilter, bloomFilter];
+            #end
+            #if mobile
+            stt = new FunkinSprite(0, 0);
+            stt.makeSolidColor(4000, 2000, 0xFFFFFFFF);
+            stt.cameras = [PlayState.instance.camGame];
+            stt.scrollFactor.set(0, 0);
+            stt.blend = 14;
+            stt.alpha = 0.12;
+            stt.zIndex = 900;
+            stt.screenCenter();
+            PlayState.instance.add(stt);
+
+            ps.camGame.filters = [nothFilter, bloomFilter];
+            ps.camHUD.filters = [nothFilter, bloomFilter];
+            #end
+        }
+        
+        function onSongStart(event) {
+            super.onSongStart(event);
+            ps = PlayState.instance;
+
+            var dad:Dynamic = ps.currentStage.getDad();
+            var bf:Dynamic  = ps.currentStage.getBoyfriend();
+            if (dad != null) dad.color = 0xFF000000; dad.alpha = 1;
+            if (bf  != null) bf.color  = 0xFF000000; bf.alpha = 1;
+
+            var allChars = [];
+            for (k in ps.currentStage.characters.keys())
+                allChars.push(ps.currentStage.characters[k]);
+
+            ps.currentStage.forEachAlive(function(m) {
+                if (allChars.contains(m)) return;
+                m.color = 0xFF4D4D4D;
+            });
+
+            FlxTween.cancelTweensOf(black);
+
+            black.alpha = 1;
+            #if !mobile
+            ps.playerStrumline.alpha = 0;
+            ps.opponentStrumline.alpha = 0;
+            ps.playerStrumline.visible = false;
+            ps.opponentStrumline.visible = false;
+            #end
+            FlxTween.tween(black, { alpha: 0 }, 8, { ease: FlxEase.sineInOut });
+        }
+
+        public override function onCountdownStart(event) { FlxTimer.wait(0.2, () -> Countdown.skipCountdown()); }
+
+        override function onSongEvent(event)
+        {
+            super.onSongEvent(event);
+            var data = event.eventData;
+
+            switch (data.eventKind)
+            {
+                case "Bloom":
+                    var dur:Float = data.value.v1 ?? 8.0;
+                    var mult:Float = data.value.v2 ?? 0.75;
+
+                    effect += mult + 0.3;
+                    FlxTween.num(effect, 0, (Conductor.instance.stepLengthMs * dur) / 1000, { onUpdate: (t) -> effect = t.value });
+                    strength += mult + 0.3;
+                    FlxTween.num(strength, 0, (Conductor.instance.stepLengthMs * dur) / 1000, { onUpdate: (t) -> strength = t.value });
+            }
+        }
+
+        function onUpdate(event) {
+            super.onUpdate(event);
+            ps = PlayState.instance;
+            bloom.setFloat("effect", effect);
+            bloom.setFloat("strength", strength);
+            #if !mobile
+            ps.opponentStrumline.notes.visible = false;
+            ps.opponentStrumline.holdNotes.visible = false;
+            ps.opponentStrumline.noteHoldCovers.visible = false;
+            #end
+        }
+
+        function onStepHit(event) {
+            super.onStepHit(event);
+            ps = PlayState.instance;
+
+            switch(event.step) {
+
+                case 56:
+                    FlxTween.cancelTweensOf(ps.camGame);
+                    FlxTween.cancelTweensOf(ps.camHUD);
+                    FlxTween.tween(ps.camGame, { angle: 15 }, (Conductor.instance.stepLengthMs * 8) / 1000, { ease: FlxEase.expoIn });
+                    FlxTween.tween(ps.camHUD, { angle: 15 }, (Conductor.instance.stepLengthMs * 8) / 1000, { ease: FlxEase.expoIn });
+
+                case 64:
+                    ps.camCutscene.flash(0xFFFFFFFF, (Conductor.instance.stepLengthMs * 8) / 1000, true);
+                    FlxTween.cancelTweensOf(ps.camGame);
+                    FlxTween.cancelTweensOf(ps.camHUD);
+                    ps.camGame.angle = 15;
+                    ps.camHUD.angle = 15;
+                    FlxTween.tween(ps.camGame, { angle: 0 }, 2, { ease: FlxEase.expoOut });
+                    FlxTween.tween(ps.camHUD, { angle: 0 }, 2, { ease: FlxEase.expoOut });
+
+                    var dad:Dynamic = ps.currentStage.getDad();
+                    var bf:Dynamic  = ps.currentStage.getBoyfriend();
+                    if (dad != null) dad.color = 0xFFFFFFFF; dad.alpha = 1;
+                    if (bf  != null) bf.color  = 0xFFFFFFFF; bf.alpha = 1;
+
+                    var allChars = [];
+                    for (k in ps.currentStage.characters.keys())
+                        allChars.push(ps.currentStage.characters[k]);
+
+                    ps.currentStage.forEachAlive(function(m) {
+                        if (allChars.contains(m)) return;
+                        m.color = 0xFFFFFFFF;
+                    });
+
+                    for (item in HUDPP)
+                    {
+                        var obj = Reflect.field(ps, item);
+                        if (obj != null) { FlxTween.tween(obj, { alpha: 1 }, (Conductor.instance.stepLengthMs * 4) / 1000, { ease: FlxEase.sineOut }); }
+                    }
+
+                case 112:
+                    #if !mobile
+                    ps.playerStrumline.visible = true;
+                    ps.opponentStrumline.visible = true;
+                    
+                    FlxTween.tween(ps.playerStrumline, { alpha: 1 }, (Conductor.instance.stepLengthMs * 4) / 1000, { ease: FlxEase.sineOut });
+                    FlxTween.tween(ps.opponentStrumline, { alpha: 1 }, (Conductor.instance.stepLengthMs * 4) / 1000, { ease: FlxEase.sineOut });
+                    #end
+
+                case 308:
+                    FlxTween.tween(ps.camGame, { angle: -5 }, (Conductor.instance.stepLengthMs * 6) / 1000, { ease: FlxEase.expoIn });
+                    FlxTween.tween(ps.camHUD, { angle: -5 }, (Conductor.instance.stepLengthMs * 6) / 1000, { ease: FlxEase.expoIn });
+
+                case 318:
+                    FlxTween.tween(ps.camGame, { angle: 0 }, (Conductor.instance.stepLengthMs * 8) / 1000, { ease: FlxEase.expoInOut });
+                    FlxTween.tween(ps.camHUD, { angle: 0 }, (Conductor.instance.stepLengthMs * 8) / 1000, { ease: FlxEase.expoInOut });
+
+                case 252:
+                    FlxTween.tween(ps.camGame, { angle: 350 }, (Conductor.instance.stepLengthMs * 3) / 1000, { ease: FlxEase.cubeInOut, onComplete: function(_) { ps.camGame.angle = 0; }});
+
+                    for (item in HUDPP)
+                    {
+                        var obj = Reflect.field(ps, item);
+                        if (obj != null) { FlxTween.tween(obj, { alpha: 0 }, (Conductor.instance.stepLengthMs * 4) / 1000, { ease: FlxEase.backIn }); }
+                    }
+
+                    #if !mobile
+                    var newXGG:Float = (FlxG.width - ps.playerStrumline.width) / 2;
+                    FlxTween.tween(ps.playerStrumline, { x: newXGG }, 0.8, { ease: FlxEase.cubeInOut });
+                    ps.playerStrumline.scrollSpeed *= 2;
+                    #end
+
+                case 512:
+                    for (item in HUDPP)
+                    {
+                        var obj = Reflect.field(ps, item);
+                        if (obj != null) { FlxTween.tween(obj, { alpha: 1 }, 2, { ease: FlxEase.cubeOut }); }
+                    }
+            }
+        }
+
+        function onBeatHit(event) {
+            super.onBeatHit(event);
+            ps = PlayState.instance;
+
+            switch(event.beat) {
+                case 28:
+            }
+        }
+
+        function onSongEnd(event) {
+            super.onSongEnd(event);
+            reset_everything();
+        }
+
+        function onSongRetry(event) {
+            super.onSongRetry(event);
+            reset_everything();
+        }
+
+        function reset_everything() {
+            ps = PlayState.instance;
+
+            FlxTween.cancelTweensOf(black);
+            ps.camGame.alpha = 1;
+            ps.camGame.visible = true;
+            ps.camHUD.alpha = 1;
+            ps.camHUD.visible = true;
+            black.alpha = 1;
+            effect = 0;
+            strength = 0;
+            var gff:BaseCharacter = ps.currentStage.getGirlfriend(); gff.visible = false;
+            
+            FlxTween.cancelTweensOf(strength);
+            FlxTween.num(strength, 0, 0.3, { onUpdate: (t) -> strength = t.value });
+            FlxTween.cancelTweensOf(effect);
+            FlxTween.num(effect, 0, 0.3, { onUpdate: (t) -> effect = t.value });
+        }
+
+        function kill() {
+            super.kill();
+        }
+    }

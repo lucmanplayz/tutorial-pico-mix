@@ -1,0 +1,133 @@
+import funkin.modding.module.Module;
+import funkin.modding.module.ModuleHandler;
+import funkin.play.event.ScriptedSongEvent;
+import funkin.play.PlayState;
+import flixel.FlxG;
+import flixel.FlxSprite;
+import flixel.text.FlxText;
+import flixel.text.FlxTextBorderStyle;
+import flixel.tweens.FlxTween;
+import openfl.display.BlendMode;
+import flixel.tweens.FlxEase;
+
+class SUBsEvent extends ScriptedSongEvent {
+    public function new() { super('SUBsEvent'); }
+    public override function getTitle() { return "SUBs"; }
+
+    public override function handleEvent(data) {
+        var mod = ModuleHandler.getModule('SUBsModule');
+        if (mod == null) return;
+        mod.setText(data.getString('v1'), data.getString('v2'));
+    }
+
+    public override function getEventSchema() {
+        return [
+            {
+                name: "v1",
+                title: "Text",
+                defaultValue: "",
+                type: "string"
+            },
+            {
+                name: "v2",
+                title: "Color",
+                defaultValue: "white",
+                type: "enum",
+                keys: [
+                    "White"   => "white",
+                    "Yellow"  => "yellow",
+                    "Red"     => "red",
+                    "Green"   => "green",
+                    "Blue"    => "blue",
+                    "Cyan"    => "cyan",
+                    "Magenta" => "magenta",
+                    "Orange"  => "orange",
+                    "Pink"    => "pink"
+                ]
+            }
+        ];
+    }
+}
+
+class SUBsModule extends Module {
+    function new() { super("SUBsModule"); }
+
+    var lyric:FlxText       = null;
+    var lyricBG:FlxSprite   = null;
+    var scaleTween:FlxTween = null;
+    var bgTween:FlxTween    = null;
+
+    override function onCountdownStart(event) {
+        super.onCountdownStart(event);
+
+        lyricBG = new FlxSprite(0, 0);
+        lyricBG.makeGraphic(1, 1, 0xFFFFFFFF);
+        lyricBG.scrollFactor.set(0, 0);
+        lyricBG.visible = false;
+        lyricBG.blend = 14;
+        lyricBG.alpha = 0.2;
+        lyricBG.cameras = [PlayState.instance.camSubtitles];
+        PlayState.instance.add(lyricBG);
+
+        lyric = new FlxText(0, 550, FlxG.width, "");
+        lyric.setFormat(Paths.font("FNF.ttf"), 30, 0xFFFFFFFF, "center", FlxTextBorderStyle.OUTLINE, 0xFF000000);
+        lyric.borderSize  = 5;
+        lyric.scrollFactor.set(0, 0);
+        lyric.visible = false;
+        lyric.cameras = [PlayState.instance.camSubtitles];
+        PlayState.instance.add(lyric);
+    }
+
+    function getColor(name:String):Int {
+        switch (name) {
+            case "yellow":  return 0xFFFFFF00;
+            case "red":     return 0xFFFF0000;
+            case "green":   return 0xFF00FF00;
+            case "blue":    return 0xFF0000FF;
+            case "cyan":    return 0xFF00FFFF;
+            case "magenta": return 0xFFFF00FF;
+            case "orange":  return 0xFFFFA500;
+            case "pink":    return 0xFFFF69B4;
+            default:        return 0xFFFFFFFF;
+        }
+    }
+
+    public function setText(text:String, color:String) {
+        if (lyric == null) return;
+
+        lyric.text    = text ?? "";
+        lyric.visible = (lyric.text != "");
+        lyricBG.visible = lyric.visible;
+
+        if (scaleTween != null) scaleTween.cancel();
+        if (bgTween != null)    bgTween.cancel();
+
+        if (lyric.visible) {
+            lyric.color = getColor(color);
+
+            var charCount:Int = lyric.text.length;
+            var bgW:Float = charCount * 20 + 60;
+            var bgH:Float = 65;
+
+            lyricBG.setGraphicSize(Std.int(bgW), Std.int(bgH));
+            lyricBG.updateHitbox();
+            lyricBG.x = lyric.x + (lyric.width - bgW) / 2;
+            lyricBG.y = lyric.y - 15;
+
+            lyric.scale.set(1.1, 1.1);
+            scaleTween = FlxTween.tween(lyric.scale, { x: 1, y: 1 }, 0.2, { ease: FlxEase.quartOut });
+        }
+    }
+
+    function onSongRetry(event) { super.onSongRetry(event); destroyLyric(); }
+    function onDestroy(event)   { super.onDestroy(event);   destroyLyric(); }
+    function onGameOver(event)  { super.onGameOver(event);  destroyLyric(); }
+    function onSongEnd(event)   { super.onSongEnd(event);   destroyLyric(); }
+
+    function destroyLyric() {
+        if (scaleTween != null) { scaleTween.cancel(); scaleTween = null; }
+        if (bgTween != null)    { bgTween.cancel();    bgTween    = null; }
+        if (lyric != null)      { lyric.destroy();     lyric      = null; }
+        if (lyricBG != null)    { lyricBG.destroy();   lyricBG    = null; }
+    }
+}

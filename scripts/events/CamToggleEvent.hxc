@@ -1,0 +1,34 @@
+import funkin.play.PlayState;
+import funkin.play.event.ScriptedSongEvent;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+
+//CODE BY BIT https://www.youtube.com/@mq-bit - https://gamebanana.com/members/4724027
+
+class CamToggleEvent extends ScriptedSongEvent {
+
+    public function new() {
+        super("CamToggle");
+    }
+
+    public override function getTitle():String {
+        return "Camera Toggle";
+    }
+
+    override function handleEvent(data) {
+        if (PlayState.instance == null) return;
+
+        var camGameVisible:Bool = data.getBool("v1") ?? true;
+        var camHUDVisible:Bool = data.getBool("v2") ?? true;
+
+        PlayState.instance.camGame.visible = camGameVisible;
+        PlayState.instance.camHUD.visible = camHUDVisible;
+    }
+
+    override function getEventSchema() {
+        return [
+            { name:'v1', title:'CamGame Visible', defaultValue:true, type:"bool" },
+            { name:'v2', title:'CamHUD Visible', defaultValue:true, type:"bool" }
+        ];
+    }
+}

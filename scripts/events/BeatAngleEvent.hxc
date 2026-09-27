@@ -1,0 +1,66 @@
+import funkin.play.event.SongEvent;
+import funkin.play.PlayState;
+import funkin.modding.module.Module;
+import funkin.modding.module.ModuleHandler;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+import funkin.Conductor;
+
+//CODE BY BIT https://www.youtube.com/@mq-bit - https://gamebanana.com/members/4724027
+
+class BeatAngleEvent extends SongEvent {
+    public function new() { super("Beat Angle"); }
+    override function getTitle() { return "Beat Angle"; }
+
+    override function handleEvent(data) {
+        var mod = ModuleHandler.getModule('BeatAngleModule');
+        mod.agv = data.getBool('v1');
+        mod.agp = data.getFloat('v2');
+
+        if(!mod.agv && PlayState.instance != null) {
+            PlayState.instance.camGame.angle = 0;
+            PlayState.instance.camHUD.angle = 0;
+        }
+    }
+
+    override function getEventSchema() {
+        return [
+            { name:'v1', title:'Enabled', defaultValue:true, type:"bool"},
+            { name:'v2', title:'Angle', defaultValue:0.5, min:0.5, max:6.0, step:0.5,
+              type:"float", units:'°'}
+        ];
+    }
+}
+class BeatAngleModule extends Module {
+    public var agv:Bool = false;
+    public var agp:Float = 0.5;
+
+    function onSongStart(){ 
+		super.onSongStart();
+        agv = false;
+        agp = 0.5; }
+	function onSongRetry(){
+		super.onSongRetry();
+        agv = false;
+        agp = 0.5; }
+
+    function onBeatHit(event:SongTimeScriptEvent) {
+        super.onBeatHit(event);
+
+        if(!agv || PlayState.instance == null) return;
+
+
+        var ps = PlayState.instance;
+        var dir:Float = (event.beat % 2 == 0) ? 1 : -1;
+        var strong:Float = agp;
+
+        ps.camGame.angle = (-dir) * strong;
+        ps.camHUD.angle = dir * (strong * 0.3);
+
+        FlxTween.cancelTweensOf(ps.camGame);
+        FlxTween.cancelTweensOf(ps.camHUD);
+        FlxTween.tween(ps.camGame, { angle: 0 }, Conductor.instance.stepLengthMs * 0.008, { ease: FlxEase.cubeOut });
+        FlxTween.tween(ps.camHUD, { angle: 0 }, Conductor.instance.stepLengthMs * 0.008, { ease: FlxEase.cubeOut });
+    }
+}
+//CODE BY BIT https://www.youtube.com/@mq-bit - https://gamebanana.com/members/4724027

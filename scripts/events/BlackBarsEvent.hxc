@@ -1,0 +1,180 @@
+import funkin.modding.module.Module;
+import funkin.play.song.Song;
+import funkin.Conductor;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+import funkin.graphics.FunkinSprite;
+import flixel.FlxG;
+import funkin.play.PlayState;
+import Reflect;
+import Std;
+import flixel.FlxCamera;
+import funkin.play.event.ScriptedSongEvent;
+
+//CODE BY BIT https://www.youtube.com/@mq-bit - https://gamebanana.com/members/4724027
+
+class BlackBarsEvent extends ScriptedSongEvent {
+    public function new() { super('BlackBarsEvent'); }
+    public override function getTitle():String { return "Black Bars"; }
+    
+    override function handleEvent(data) {}
+
+    public override function getEventSchema() {
+        return [
+            {
+                name: "v1",
+                title: "Bar Size (px)",
+                defaultValue: 100,
+                min: 0,
+                max: 400,
+                step: 5,
+                type: "float",
+                units: "px"
+            },
+            {
+                name: "v2",
+                title: "Duration (steps)",
+                defaultValue: 2,
+                min: 0,
+                step: 0.2,
+                type: "float",
+                units: "steps"
+            },
+            {
+                name: "v3",
+                title: "Ease Type",
+                defaultValue: "cube",
+                type: "enum",
+                keys:[
+                    'Linear'=>'linear','Quad'=>'quad','Cube'=>'cube','Quart'=>'quart','Quint'=>'quint',
+                    'Sine'=>'sine','Expo'=>'expo','Circ'=>'circ','Elastic'=>'elastic','Back'=>'back',
+                    'Bounce'=>'bounce','SmoothStep'=>'smoothStep','SmootherStep'=>'smootherStep'
+                ]
+            },
+            {
+                name: "v4",
+                title: "Ease Dir",
+                defaultValue: "Out",
+                type: "enum",
+                keys: [
+                    "In" => "In",
+                    "Out" => "Out",
+                    "InOut" => "InOut"
+                ]
+            }
+        ];
+    }
+}
+
+class BlackBarsHandler extends Module {
+
+    function new() { super("BlackBarsModule"); }
+
+    public var sexCam:FlxCamera; // Main Camera for the HUD
+
+    var tweenTop:FlxTween = null;
+    var tweenBottom:FlxTween = null;
+    var barTop:FunkinSprite = null;
+    var barBottom:FunkinSprite = null;
+
+override function onCountdownStart(event) {
+    super.onCountdownStart(event);
+
+    sexCam = new FlxCamera();
+    sexCam.bgColor = 0;
+
+    var index = FlxG.cameras.list.indexOf(PlayState.instance.camHUD);
+    FlxG.cameras.insert(sexCam, Math.max(0, index), false);
+
+    for (i in 0...2) {
+        var bar = new FunkinSprite(0, 0);
+        bar.makeSolidColor(FlxG.width, FlxG.height, 0xFF000000);
+        bar.scrollFactor.set(0, 0);
+        bar.cameras = [sexCam];
+
+        if (i == 0) {
+            bar.y = -FlxG.height;
+            barTop = bar;
+        } else {
+            bar.y = FlxG.height;
+            barBottom = bar;
+        }
+
+        PlayState.instance.add(bar);
+    }
+}
+
+override function onUpdate(ev) {
+    if ((tweenTop?.active || tweenBottom?.active)) {
+        if (barTop != null) barTop.updateHitbox();
+        if (barBottom != null) barBottom.updateHitbox();
+    }
+}
+
+override function onSongEvent(event) {
+    super.onSongEvent(event);
+
+    var e = event.eventData;
+    if (e.eventKind != "BlackBarsEvent") return;
+
+    var v = e.value;
+
+    var size:Float = v.v1;
+    var steps:Float = v.v2;
+    var ease:String = v.v3 + v.v4;
+
+    var dur:Float = (Conductor.instance.stepLengthMs * steps) / 1000;
+    var func = Reflect.field(FlxEase, ease);
+
+    for (t in [tweenTop, tweenBottom]) {
+        if (t != null) t.cancel();
+    }
+
+    var topTarget:Float = -FlxG.height + size;
+    var bottomTarget:Float = FlxG.height - size;
+
+    if (barTop != null) {
+        barTop.visible = true;
+
+        tweenTop = FlxTween.tween(barTop, { y: topTarget }, dur, {
+            ease: func,
+            onComplete: function(_) {
+                if (size == 0) barTop.visible = false;
+            }
+        });
+    }
+
+    if (barBottom != null) {
+        barBottom.visible = true;
+
+        tweenBottom = FlxTween.tween(barBottom, { y: bottomTarget }, dur, {
+            ease: func,
+            onComplete: function(_) {
+                if (size == 0) barBottom.visible = false;
+            }
+        });
+    }
+}
+
+    function onSongRetry(event) {
+        super.onSongRetry(event); bitdestroypenis(); }
+
+    function onDestroy(event) {
+        super.onDestroy(event); bitdestroypenis(); }
+
+    function onGameOver(event) {
+        super.onGameOver(event); bitdestroypenis(); }
+
+    function onSongEnd(event) {
+        super.onSongRetry(event); bitdestroypenis(); }
+
+    function bitdestroypenis() {
+        for (bar in [barTop, barBottom, sexCam])
+            if (bar != null) bar.destroy();
+
+        barTop = null;
+        barBottom = null;
+    }
+}
+
+//CODE BY BIT https://www.youtube.com/@mq-bit - https://gamebanana.com/members/4724027

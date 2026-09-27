@@ -1,0 +1,52 @@
+package funkin.play.event;
+
+import funkin.play.PlayState;
+import funkin.Conductor;
+import flixel.tweens.FlxEase;
+import funkin.play.event.ScriptedSongEvent;
+import Reflect;
+import flixel.FlxG;
+
+//CODE BY BIT https://www.youtube.com/@mq-bit - https://gamebanana.com/members/4724027
+
+class ZoomEvent extends ScriptedSongEvent {
+
+    public function new() { super("Zoom"); }
+
+    override function getTitle():String { return "Zoom Additive"; }
+
+    override function handleEvent(data) {
+        if (PlayState.instance == null || PlayState.instance.isMinimalMode) return;
+
+        var addValue:Float = data.getFloat('v1') ?? 0.075;
+        var duration:Float = data.getFloat('v2') ?? 4.0;
+        var ease:String = data.getString('v3') ?? "cube";
+        var easeDir:String = data.getString('v4') ?? "Out";
+        var tarZoom:Float = PlayState.instance.currentCameraZoom + addValue;
+
+        if (ease == "INSTANT") { PlayState.instance.tweenCameraZoom(tarZoom, 0, true); return; }
+
+        var dur:Float = (Conductor.instance.stepLengthMs * duration) / 1000;
+        var eas:String = ease.toLowerCase() + easeDir;
+        var f:Null<Float->Float> = Reflect.field(FlxEase, eas) ?? FlxEase.linear;
+
+        PlayState.instance.tweenCameraZoom(tarZoom, dur, true, f);
+    }
+
+    override function getEventSchema() {
+        return [
+            { name:'v1', title:'Add Value', defaultValue:0.075, min:-2, max:2, step:0.025, type:"float", units:'+x' },
+            { name:'v2', title:'Duration', defaultValue:4, min:0, step:0.5, type:"float", units:'steps' },
+            { name:'v3', title:'Easing Type', defaultValue:"cube", type:"enum", 
+            keys:[
+                'Linear'=>'linear','Quad'=>'quad','Cube'=>'cube','Quart'=>'quart','Quint'=>'quint',
+                'Sine'=>'sine','Expo'=>'expo','Circ'=>'circ','Elastic'=>'elastic','Back'=>'back',
+                'Bounce'=>'bounce','SmoothStep'=>'smoothStep','SmootherStep'=>'smootherStep','Instant (Ignores Duration)'=>'INSTANT'
+            ]
+            },
+            { name:'v4', title:'Easing Direction', defaultValue:"Out", type:"enum", keys:[
+                'In'=>'In','Out'=>'Out','In/Out'=>'InOut'
+            ]}
+        ];
+    }
+}

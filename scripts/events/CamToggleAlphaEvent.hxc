@@ -1,0 +1,65 @@
+import funkin.play.PlayState;
+import funkin.play.event.ScriptedSongEvent;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+import funkin.Conductor;
+import Reflect;
+
+//CODE BY BIT https://www.youtube.com/@mq-bit - https://gamebanana.com/members/4724027
+
+class CamToggleAlphaEvent extends ScriptedSongEvent {
+
+    public function new() {
+        super("CamToggleAlpha");
+    }
+
+    public override function getTitle():String {
+        return "Camera Toggle (Fade)";
+    }
+
+    override function handleEvent(data) {
+        if (PlayState.instance == null) return;
+        var ps = PlayState.instance;
+        var camGameAlpha:Float = data.getFloat("v1") ?? 1.0;
+        var camHUDAlpha:Float = data.getFloat("v2") ?? 1.0;
+        var pp:Float = data.getFloat("v3") ?? 4;
+        var easeType:String = data.getString("v4") ?? "cube";
+        var easeDir:String = data.getString("v5") ?? "Out";
+
+        var dur:Float = (Conductor.instance.stepLengthMs * pp) / 1000;
+
+        if (easeType == "INSTANT") {
+            FlxTween.cancelTweensOf(ps.camGame);
+            FlxTween.cancelTweensOf(ps.camHUD);
+            ps.camGame.alpha = camGameAlpha;
+            ps.camHUD.alpha = camHUDAlpha;
+            return;
+        }
+
+        var eas:String = easeType.toLowerCase() + easeDir;
+        var f:Null<Float->Float> = Reflect.field(FlxEase, eas) ?? FlxEase.linear;
+
+        FlxTween.cancelTweensOf(ps.camGame);
+        FlxTween.cancelTweensOf(ps.camHUD);
+        FlxTween.tween(ps.camGame, { alpha: camGameAlpha }, dur, { ease: f });
+        FlxTween.tween(ps.camHUD, { alpha: camHUDAlpha }, dur, { ease: f });
+    }
+
+    override function getEventSchema() {
+        return [
+            { name:'v1', title:'CamGame Alpha', defaultValue:1.0, min:0, max:1, step:0.01, type:"float" },
+            { name:'v2', title:'CamHUD Alpha', defaultValue:1.0, min:0, max:1, step:0.01, type:"float" },
+            { name:'v3', title:'Tween Steps Multiplier', defaultValue:4, min:0, step:1, type:"float" },
+            { name:'v4', title:'Easing Type', defaultValue:"linear", type:"enum", 
+              keys:[
+                  'Linear'=>'linear','Quad'=>'quad','Cube'=>'cube','Quart'=>'quart','Quint'=>'quint',
+                  'Sine'=>'sine','Expo'=>'expo','Circ'=>'circ','Elastic'=>'elastic','Back'=>'back',
+                  'Bounce'=>'bounce','SmoothStep'=>'smoothStep','SmootherStep'=>'smootherStep','Instant (Ignores Duration)'=>'INSTANT'
+              ]
+            },
+            { name:'v5', title:'Easing Direction', defaultValue:"Out", type:"enum", keys:[
+                  'In'=>'In','Out'=>'Out','In/Out'=>'InOut'
+            ]}
+        ];
+    }
+}

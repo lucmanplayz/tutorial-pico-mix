@@ -1,0 +1,241 @@
+import funkin.play.character.AnimateAtlasCharacter;
+import funkin.play.PlayState;
+import funkin.graphics.FunkinSprite;
+import funkin.audio.visualize.ABotVis;
+
+class AbotCharBaseCharacter extends AnimateAtlasCharacter
+{
+  var abotPete:FunkinSprite;
+  var abot:FunkinSprite;
+  var abotViz:ABotVis;
+  var stereoBG:FunkinSprite;
+  var eyeWhites:FunkinSprite;
+  var pupil:FunkinSprite;
+
+  var hasSetupAbot:Bool = false;
+  var currentShader:FlxRuntimeShader = null;
+
+  var baseZ:Int = 300;
+
+  var lookingLeft:Bool = false;
+
+  public function new(characterId:String)
+  {
+    if (characterId == "UNKNOWN")
+    {
+      characterId = "AbotChar";
+    }
+
+    super(characterId);
+  }
+
+  public override function onCreate(event:ScriptEvent)
+  {
+    super.onCreate(event);
+    var gff:BaseCharacter = PlayState.instance.currentStage.getGirlfriend();
+    
+    abotPete = new FunkinSprite(0, 0);
+    abotPete.alpha = 1;
+    abotPete.visible = true;
+    PlayState.instance.add(abotPete);
+
+    stereoBG = new FunkinSprite(0, 0, Paths.image('characters/abot/stereoBG'));
+    eyeWhites = new FunkinSprite().makeSolidColor(160, 60);
+
+    pupil = FunkinSprite.createTextureAtlas(0, 0, "characters/abot/systemEyes", "shared");
+
+    pupil.anim.onFrameChange.add(function(name:String, frameNumber:Int, frameIndex:Int)
+    {
+      if (frameNumber == 16 || frameNumber == 30)
+      {
+        pupil.anim.pause();
+      }
+    });
+
+    abot = new ABotAtlasSprite(0, 0);
+
+    abotViz = new ABotVis(FlxG.sound.music, false);
+    abotViz.alpha = 0;
+  }
+
+  public override function dance(forceRestart:Bool)
+  {
+    if (abot?.anim != null)
+    {
+      abot.anim.play("", true, false, 1);
+    }
+  }
+
+  public override function onUpdate(event:UpdateScriptEvent)
+  {
+    super.onUpdate(event);
+
+    synchronizeShader();
+
+    abot.visible       = abotPete.visible;
+    pupil.visible      = abotPete.visible;
+    eyeWhites.visible  = abotPete.visible;
+    stereoBG.visible   = abotPete.visible;
+    abotViz.visible    = abotPete.visible;
+
+    abot.alpha       = abotPete.alpha;
+    pupil.alpha      = abotPete.alpha;
+    eyeWhites.alpha  = abotPete.alpha;
+    stereoBG.alpha   = abotPete.alpha;
+    abotViz.alpha    = abotPete.alpha;
+
+    abot.scrollFactor.set(abotPete.scrollFactor.x, abotPete.scrollFactor.y);
+    pupil.scrollFactor.set(abotPete.scrollFactor.x, abotPete.scrollFactor.y);
+    eyeWhites.scrollFactor.set(abotPete.scrollFactor.x, abotPete.scrollFactor.y);
+    stereoBG.scrollFactor.set(abotPete.scrollFactor.x, abotPete.scrollFactor.y);
+    abotViz.scrollFactor.set(abotPete.scrollFactor.x, abotPete.scrollFactor.y);
+
+    abot.color       = abotPete.color;
+    pupil.color      = abotPete.color;
+    eyeWhites.color  = abotPete.color;
+    stereoBG.color   = abotPete.color;
+    abotViz.color    = abotPete.color;
+
+    if (!hasSetupAbot)
+    {
+      setupAbot();
+    }
+  }
+
+  function lookLeft()
+  {
+    if (lookingLeft) return;
+
+    lookingLeft = true;
+    pupil.anim.play("", true, false, 17);
+  }
+
+  function lookRight()
+  {
+    if (!lookingLeft) return;
+
+    lookingLeft = false;
+    pupil.anim.play("", true, false, 0);
+  }
+
+  public override function onSongEvent(scriptEvent:SongEventScriptEvent)
+  {
+    super.onSongEvent(scriptEvent);
+
+    if (scriptEvent.eventData.eventKind == "FocusCamera")
+    {
+      var char = scriptEvent.eventData.value.char;
+
+      switch (char)
+      {
+        case 1: lookRight();
+        case 0: lookLeft();
+      }
+    }
+  }
+
+  function moveByNote(kind:String)
+  {
+    switch (kind)
+    {
+      case "weekend-1-lightcan":
+        lookLeft();
+
+      case "weekend-1-cockgun":
+        lookRight();
+
+      default:
+    }
+  }
+
+  public override function onNoteHit(event:HitNoteScriptEvent)
+  {
+    super.onNoteHit(event);
+    moveByNote(event.note.kind);
+  }
+
+  public override function onNoteMiss(event:NoteScriptEvent)
+  {
+    super.onNoteMiss(event);
+    moveByNote(event.note.kind);
+  }
+
+  function setupAbot()
+  {
+    var gff:BaseCharacter = PlayState.instance.currentStage.getGirlfriend();
+    baseZ = gff.zIndex;
+
+    abot.x = this.x - 95 - (-(this.globalOffsets[0] - 75) * this.scale.x);
+    abot.y = this.y + 384 - (-(this.globalOffsets[1] - 160) * this.scale.y);
+    currentStage.add(abot);
+
+    abotViz.x = abot.x + 207;
+    abotViz.y = abot.y + 84;
+    currentStage.add(abotViz);
+
+    eyeWhites.x = abot.x + 40;
+    eyeWhites.y = abot.y + 250;
+    currentStage.add(eyeWhites);
+
+    pupil.x = abot.x + 50;
+    pupil.y = abot.y + 238;
+    currentStage.add(pupil);
+
+    stereoBG.x = abot.x + 150;
+    stereoBG.y = abot.y + 30;
+    currentStage.add(stereoBG);
+
+    setZ(baseZ);
+
+    hasSetupAbot = true;
+  }
+
+  function setZ(newZ:Int)
+  {
+    baseZ = newZ;
+
+    stereoBG.zIndex = baseZ - 4;
+    eyeWhites.zIndex = baseZ - 3;
+    abotViz.zIndex = baseZ - 2;
+    pupil.zIndex = baseZ - 1;
+    abot.zIndex = baseZ;
+
+    currentStage.refresh();
+  }
+
+  function synchronizeShader()
+  {
+    if (currentShader == this.shader) return;
+
+    currentShader = this.shader;
+
+    abot.shader = currentShader;
+    abotViz.shader = currentShader;
+    stereoBG.shader = currentShader;
+    eyeWhites.shader = currentShader;
+
+    for (member in abotViz.members)
+    {
+      member.shader = currentShader;
+    }
+  }
+
+  public override function onSongStart(event:ScriptEvent)
+  {
+    abotViz.snd = FlxG.sound.music;
+    abotViz.initAnalyzer();
+    abotViz.alpha = 1;
+  }
+
+  public override function onSongRetry(event:SongRetryEvent)
+  {
+    super.onSongRetry();
+    abotViz.dumpSound();
+  }
+
+  public override function onSongEnd(event:ScriptEvent)
+  {
+    super.onSongEnd();
+    abotViz.dumpSound();
+  }
+}

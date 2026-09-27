@@ -1,0 +1,114 @@
+import funkin.play.event.SongEvent;
+import funkin.play.PlayState;
+import funkin.modding.module.Module;
+import funkin.modding.module.ModuleHandler;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+import funkin.Conductor;
+
+//CODE BY BIT https://www.youtube.com/@mq-bit - https://gamebanana.com/members/4724027
+
+class BeatKabumEvent extends SongEvent {
+    public function new() { super("BeatKabumEvent"); }
+    override function getTitle() { return "Beat Kabum"; }
+
+    override function handleEvent(data) {
+        var mod = ModuleHandler.getModule('BeatKabumModule');
+
+        var enabled = data.getBool('v1');
+        var intensity = data.getFloat('v2');
+
+        mod.kabumActive = enabled;
+
+        if (!Math.isNaN(intensity)) {
+            mod.angleIntensity = intensity;
+        }
+
+        if (enabled) {
+            mod.lastDir *= -1;
+            mod.effect(mod.angleIntensity * mod.lastDir);
+        } else {
+            mod.resetCamera();
+        }
+    }
+
+    override function getEventSchema() {
+        return [
+            {
+                name: "v1",
+                title: "Enabled",
+                defaultValue: true,
+                type: "bool"
+            },
+            {
+                name: "v2",
+                title: "Intensity",
+                defaultValue: 0.8,
+                min: 0,
+                max: 5,
+                step: 0.1,
+                type: "float"
+            }
+        ];
+    }
+}
+
+class BeatKabumModule extends Module {
+
+    public var kabumActive:Bool = false;
+    public var angleIntensity:Float = 0.8;
+    public var lastDir:Int = 1;
+
+    var defGameX:Float = 0;
+    var defHUDX:Float = 0;
+
+    function onCountdownStart(_) {
+        kabumActive = false;
+        angleIntensity = 0.8;
+        lastDir = 1;
+    }
+
+    override function onBeatHit(evt:Dynamic) {
+        if (!kabumActive || PlayState.instance == null) return;
+
+        var dir:Int = (evt.beat % 2 == 0) ? 1 : -1;
+        lastDir = dir;
+
+        effect(angleIntensity * dir);
+    }
+
+    public function effect(angle:Float) {
+        var ps = PlayState.instance;
+        if (ps == null) return;
+
+        FlxTween.cancelTweensOf(ps.camGame, ['angle', 'x']);
+        FlxTween.cancelTweensOf(ps.camHUD, ['angle', 'x']);
+
+        ps.camGame.angle = angle * 2;
+        ps.camHUD.angle = angle * 2;
+
+        FlxTween.tween(ps.camGame, { angle: angle }, (Conductor.instance.stepLengthMs * 2) / 1000, { ease: FlxEase.circOut });
+        FlxTween.tween(ps.camHUD, { angle: angle }, (Conductor.instance.stepLengthMs * 2) / 1000, { ease: FlxEase.circOut });
+
+        FlxTween.tween(ps.camGame, { x: defGameX + (-angle * 8) }, (Conductor.instance.stepLengthMs * 4) / 1000, { ease: FlxEase.linear });
+        FlxTween.tween(ps.camHUD, { x: defHUDX + (-angle * 8) }, (Conductor.instance.stepLengthMs * 4) / 1000, { ease: FlxEase.linear });
+    }
+
+    function resetCamera() {
+        var ps = PlayState.instance;
+        if (ps == null) return;
+        kabumActive = false;
+        angleIntensity = 0.8;
+        lastDir = 1;
+
+        FlxTween.cancelTweensOf(ps.camGame, ['angle', 'x']);
+        FlxTween.cancelTweensOf(ps.camHUD, ['angle', 'x']);
+
+        ps.camGame.angle = 0;
+        ps.camHUD.angle = 0;
+        ps.camGame.x = defGameX;
+        ps.camHUD.x = defHUDX;
+    }
+
+    function onSongRetry() { resetCamera(); }
+}

@@ -1,0 +1,70 @@
+import funkin.play.event.SongEvent;
+import funkin.play.PlayState;
+import funkin.modding.module.Module;
+import funkin.modding.module.ModuleHandler;
+import funkin.Preferences;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+
+//CODE BY BIT https://www.youtube.com/@mq-bit - https://gamebanana.com/members/4724027
+
+class ModchartHUDEvent extends SongEvent {
+    public function new() { super("ModchartHUD"); }
+    override function getTitle() { return "ModchartHUD"; }
+
+    override function handleEvent(data) {
+        var mod = ModuleHandler.getModule('ModchartHUDModule');
+        mod.bbv = data.getBool('v1');
+        mod.bbp = data.getFloat('v2');
+        mod.bbd = data.getInt('v3');
+
+        if (!mod.bbv && PlayState.instance != null) {
+            FlxTween.cancelTweensOf(PlayState.instance.camHUD.scroll);
+            PlayState.instance.camHUD.scroll.y = 0;
+        }
+    }
+
+    override function getEventSchema() {
+        return [
+            { name:'v1', title:'Enabled', defaultValue:true, type:"bool" },
+            { name:'v2', title:'Offset Y', defaultValue:5.0, min:5.0, max:150.0, step:5.0,
+              type:"float", units:'px' },
+            { name:'v3', title:'Beat Divisor', defaultValue:1, min:1, max:16, step:1,
+              type:"float", units:'px' }
+        ];
+    }
+}
+
+class ModchartHUDModule extends Module {
+    public var bbv:Bool = false;
+    public var bbp:Float = 14.0;
+    public var bbd:Int = 1;
+
+    function onBeatHit(event:SongTimeScriptEvent) {
+        super.onBeatHit(event);
+
+        if (!bbv || PlayState.instance == null) return;
+        if (event.beat % bbd != 0) return;
+
+        var hud = PlayState.instance.camHUD;
+        var offy:Float = Preferences.get_downscroll() ? -bbp : bbp;
+
+        FlxTween.cancelTweensOf(hud.scroll);
+        FlxTween.tween(hud.scroll, {y: offy}, 0.1, {ease: FlxEase.circOut, onComplete: function(_) {
+            FlxTween.tween(hud.scroll, {y: 0}, 0.5, {ease: FlxEase.circOut});
+        }});
+    }
+
+    function onSongStart()  { reset(); }
+    function onSongRetry()  { reset(); }
+
+    function reset() {
+        bbv = false;
+        bbp = 14.0;
+        bbd = 1;
+        if (PlayState.instance != null) {
+            FlxTween.cancelTweensOf(PlayState.instance.camHUD.scroll);
+            PlayState.instance.camHUD.scroll.y = 0;
+        }
+    }
+}

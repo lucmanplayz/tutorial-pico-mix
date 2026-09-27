@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TextureAtlas imagePath="nenepixel.png" width="184" height="43">
+  <SubTexture name="idle0001" x="0" y="0"  width="46" height="43" frameX="2" frameY="-2" frameWidth="46" frameHeight="50"/>
+
+  <SubTexture name="confirm0001" x="0" y="0"  width="46" height="43" frameX="2" frameY="-2" frameWidth="46" frameHeight="50"/>
+  <SubTexture name="confirm0002" x="46" y="0"  width="46" height="43" frameX="2" frameY="-2" frameWidth="46" frameHeight="50"/>
+  <SubTexture name="confirm0003" x="92" y="0"  width="46" height="43" frameX="2" frameY="-2" frameWidth="46" frameHeight="50"/>
+  <SubTexture name="confirm0004" x="138" y="0"  width="46" height="43" frameX="2" frameY="-2" frameWidth="46" frameHeight="50"/>
+
+  <SubTexture name="confirm-hold0001" x="138" y="0"  width="46" height="43" frameX="2" frameY="-2" frameWidth="46" frameHeight="50"/>
+</TextureAtlas>

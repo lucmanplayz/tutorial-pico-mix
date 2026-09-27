@@ -1,0 +1,74 @@
+import funkin.play.event.ScriptedSongEvent;
+import funkin.play.character.BaseCharacter;
+import funkin.play.PlayState;
+
+//CODE BY BIT https://www.youtube.com/@mq-bit - https://gamebanana.com/members/4724027
+
+class IdleSuffixEvent extends ScriptedSongEvent
+{
+    public function new() 
+    { 
+        super("IdleSuffix"); 
+    }
+
+    override function getTitle() 
+    { 
+        return "Idle Suffix"; 
+    }
+
+    override function handleEvent(data)
+    {
+        if (PlayState.instance == null || PlayState.instance.currentStage == null) return;
+
+        var t = data.getString('v1') ?? "bf";
+        var s = data.getString('v2');
+
+        var c = getChar(t);
+        if (c == null) return;
+
+        if (s == "" || s == null)
+        { c.idleSuffix = ""; } else { c.idleSuffix = "-" + s; }
+        c.dance(true);
+    }
+
+    override function getEventSchema()
+    {
+        return [
+            {
+                name: 'v1',
+                title: 'Target',
+                defaultValue: "bf",
+                type: "enum",
+                keys: [
+                    "bf" => "Boyfriend",
+                    "dad" => "Dad",
+                    "gf" => "Girlfriend",
+                    "all" => "All"
+                ]
+            },
+            {
+                name: 'v2',
+                title: 'Suffix',
+                defaultValue: "",
+                type: "string"
+            }
+        ];
+    }
+
+    function getChar(t:String):BaseCharacter
+    {
+        var stage = PlayState.instance.currentStage;
+        if (stage == null) return null;
+
+        return switch (t.toLowerCase())
+        {
+            case "bf", "boyfriend": stage.getBoyfriend();
+            case "dad":             stage.getDad();
+            case "gf", "girlfriend":stage.getGirlfriend();
+            case "all":             stage.getBoyfriend();
+                                    stage.getDad();
+                                    stage.getGirlfriend();
+            default:                stage.getNamedCharacter(t);
+        };
+    }
+}

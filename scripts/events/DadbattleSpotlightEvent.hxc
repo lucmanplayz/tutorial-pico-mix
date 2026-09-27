@@ -1,0 +1,302 @@
+import funkin.modding.module.Module;
+import funkin.modding.module.ModuleHandler;
+import funkin.play.event.ScriptedSongEvent;
+import funkin.graphics.FunkinSprite;
+import funkin.play.PlayState;
+import funkin.Conductor;
+import flixel.FlxG;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+import flixel.util.FlxColor;
+import openfl.display.BlendMode;
+
+//CODE BY BIT https://www.youtube.com/@mq-bit - https://gamebanana.com/members/4724027
+
+class DadbattleSpotlightEvent extends ScriptedSongEvent {
+    public function new() { super('DadbattleSpotlightEvent'); }
+    public override function getTitle() { return "Dadbattle Spotlight"; }
+
+    public override function handleEvent(data) {
+        var mod = ModuleHandler.getModule('DadbattleSpotlightModule');
+        mod.enabled = data.getString('v1');
+        mod.who     = data.getString('v2');
+    }
+
+    public override function getEventSchema() {
+        return [
+            {
+                name: "v1",
+                title: "Enabled",
+                defaultValue: "on",
+                type: "enum",
+                keys: [
+                    "On"  => "on",
+                    "Off" => "off"
+                ]
+            },
+            {
+                name: "v2",
+                title: "Character",
+                defaultValue: "dad",
+                type: "enum",
+                keys: [
+                    "Dad"       => "dad",
+                    "Boyfriend" => "boyfriend",
+                    "GF"        => "gf"
+                ]
+            }
+        ];
+    }
+}
+
+class DadbattleSpotlightModule extends Module {
+    function new() { super("DadbattleSpotlightModule"); }
+
+    var folder:String    = "stagespotlight/";
+    var smokeX:Float     = -1550;
+    var smokeY:Float     = 720;
+    var offsetX:Float    = 200;
+    var spotlightX:Float = 400;
+    var spotlightY:Float = 200;
+    var pt:Float         = 0.3;
+
+    var lightOffsets:Map<String, {x:Float, y:Float}> = [
+        "dad"       => {x: 60,  y: 30},
+        "boyfriend" => {x: 10,  y: 0},
+        "gf"        => {x: 0,  y: 0}
+    ];
+
+    public var enabled:String = "off";
+    public var who:String     = "dad";
+
+    var affectedProps:Array<{prop:Dynamic, oldColor:Int}> = [];
+    var affectedChars:Array<{prop:Dynamic, oldColor:Int}> = [];
+
+    var stageIsDark:Bool  = false;
+    var currentWho:String = "";
+
+    var spotLight:FunkinSprite = null;
+    var smoke1:FunkinSprite    = null;
+    var smoke2:FunkinSprite    = null;
+    var spotTween:FlxTween     = null;
+    var smokeTween1:FlxTween = null;
+    var smokeTween2:FlxTween = null;
+
+    override function onCountdownStart(event) {
+        super.onCountdownStart(event);
+
+        spotLight = new FunkinSprite(spotlightX, spotlightY);
+        spotLight.loadGraphic(Paths.image(folder + "spotlight"));
+        spotLight.alpha   = 0.2;
+        spotLight.blend   = BlendMode.ADD;
+        spotLight.visible = false;
+        spotLight.cameras = [PlayState.instance.camGame];
+        PlayState.instance.add(spotLight);
+
+        smoke1 = new FunkinSprite(smokeX + offsetX, smokeY);
+        smoke1.loadGraphic(Paths.image(folder + "smoke"));
+        smoke1.alpha   = 0.7;
+        smoke1.blend   = BlendMode.ADD;
+        smoke1.cameras = [PlayState.instance.camGame];
+        PlayState.instance.add(smoke1);
+
+        smoke2 = new FunkinSprite(-smokeX + offsetX, smokeY);
+        smoke2.loadGraphic(Paths.image(folder + "smoke"));
+        smoke2.alpha   = 0.7;
+        smoke2.blend   = BlendMode.ADD;
+        smoke2.flipX   = true;
+        smoke2.cameras = [PlayState.instance.camGame];
+        PlayState.instance.add(smoke2);
+        smoke1.alpha   = 0;
+        smoke2.alpha   = 0;
+        smoke1.visible   = false;
+        smoke2.visible   = false;
+    }
+
+    function getDur():Float {
+        return (Conductor.instance.stepLengthMs * 6) / 1000;
+    }
+
+    function dimColor(original:Int):Int {
+        var r = ((original >> 16) & 0xFF) * pt;
+        var g = ((original >> 8)  & 0xFF) * pt;
+        var b = ( original        & 0xFF) * pt;
+        return FlxColor.fromRGB(Std.int(r), Std.int(g), Std.int(b));
+    }
+
+    function darkenAll(who:String) {
+        var spotChar = getChar(who);
+        var dur      = getDur();
+
+        var allChars = [];
+        for (k in PlayState.instance.currentStage.characters.keys())
+            allChars.push(PlayState.instance.currentStage.characters[k]);
+
+        if (!stageIsDark) {
+            affectedProps = [];
+            PlayState.instance.currentStage.forEachAlive(function(m) {
+                if (allChars.contains(m)) return;
+                affectedProps.push({prop: m, oldColor: m.color});
+                FlxTween.color(m, dur, m.color, dimColor(m.color), { ease: FlxEase.quadInOut });
+            });
+        }
+
+        affectedChars = [];
+        for (c in allChars) {
+            if (c == spotChar) continue;
+            affectedChars.push({prop: c, oldColor: c.color});
+            FlxTween.color(c, dur, c.color, dimColor(c.color), { ease: FlxEase.quadInOut });
+        }
+
+        stageIsDark = true;
+        currentWho  = who;
+    }
+
+    function switchChar(newWho:String) {
+        var dur        = getDur();
+        var oldChar    = getChar(currentWho);
+        var newChar    = getChar(newWho);
+
+        if (oldChar != null)
+            FlxTween.color(oldChar, dur, oldChar.color, dimColor(oldChar.color), { ease: FlxEase.quadInOut });
+
+        if (newChar != null) {
+            var oldColor = newChar.color;
+            for (entry in affectedChars)
+                if (entry.prop == newChar) { oldColor = entry.oldColor; break; }
+            FlxTween.color(newChar, dur, newChar.color, oldColor, { ease: FlxEase.quadInOut });
+        }
+
+        affectedChars = [];
+        var allChars = [];
+        for (k in PlayState.instance.currentStage.characters.keys())
+            allChars.push(PlayState.instance.currentStage.characters[k]);
+        for (c in allChars) {
+            if (c == newChar) continue;
+            affectedChars.push({prop: c, oldColor: c.color});
+        }
+
+        currentWho = newWho;
+    }
+
+    function brightenAll() {
+        var dur = getDur();
+
+        for (entry in affectedProps)
+            FlxTween.color(entry.prop, dur, dimColor(entry.oldColor), entry.oldColor, { ease: FlxEase.quadInOut });
+
+        for (entry in affectedChars)
+            FlxTween.color(entry.prop, dur, dimColor(entry.oldColor), entry.oldColor, { ease: FlxEase.quadInOut });
+
+        var spotChar = getChar(currentWho);
+        if (spotChar != null)
+            FlxTween.color(spotChar, dur, spotChar.color, 0xFFFFFFFF, { ease: FlxEase.quadInOut });
+
+        affectedProps = [];
+        affectedChars = [];
+        stageIsDark   = false;
+        currentWho    = "";
+    }
+
+    override function onSongEvent(event) {
+        super.onSongEvent(event);
+
+        var e = event.eventData;
+        if (e.eventKind != "DadbattleSpotlightEvent") return;
+
+        var v      = e.value;
+        var enabled:String = v.v1;
+        var who:String     = v.v2;
+        var dur:Float      = getDur();
+
+        if (enabled == "off") {
+            brightenAll();
+
+            if (spotTween != null) spotTween.cancel();
+            spotTween = FlxTween.tween(spotLight, { alpha: 0 }, dur, {
+                ease: FlxEase.expoInOut,
+                onComplete: function(_) {
+                    spotLight.visible = false;
+                    spotLight.alpha   = 0.2;
+                }
+            });
+
+            if (smokeTween1 != null) smokeTween1.cancel();
+            if (smokeTween2 != null) smokeTween2.cancel();
+            smokeTween1 = FlxTween.tween(smoke1, { alpha: 0 }, dur * 1.7, {
+                ease: FlxEase.expoInOut,
+                onComplete: function(_) { smoke1.visible = false; smoke1.velocity.x = 0; }
+            });
+            smokeTween2 = FlxTween.tween(smoke2, { alpha: 0 }, dur * 1.7, {
+                ease: FlxEase.expoInOut,
+                onComplete: function(_) { smoke2.visible = false; smoke2.velocity.x = 0; }
+            });
+
+        } else {
+            if (!stageIsDark) {
+                darkenAll(who);
+            } else if (who != currentWho) {
+                switchChar(who);
+            }
+
+            var char = getChar(who);
+            if (char != null) {
+                var off     = lightOffsets[who];
+                var targetX = (char.x + char.width / 2) - spotLight.width  / 2 + off.x;
+                var targetY =  char.y + char.height     - spotLight.height      + off.y;
+
+                if (!spotLight.visible) {
+                    spotLight.x       = targetX;
+                    spotLight.y       = targetY;
+                    spotLight.alpha   = 0;
+                    spotLight.visible = true;
+
+                    if (spotTween != null) spotTween.cancel();
+                    spotTween = FlxTween.tween(spotLight, { alpha: 0.2 }, dur, { ease: FlxEase.expoInOut });
+                } else {
+                    if (spotTween != null) spotTween.cancel();
+                    spotTween = FlxTween.tween(spotLight, { x: targetX, y: targetY }, dur, { ease: FlxEase.expoInOut });
+                }
+            }
+
+            smoke1.visible    = true;
+            smoke2.visible    = true;
+            if (smokeTween1 != null) smokeTween1.cancel();
+            if (smokeTween2 != null) smokeTween2.cancel();
+            smokeTween1 = FlxTween.tween(smoke1, { alpha: 0.7 }, dur, { ease: FlxEase.expoInOut });
+            smokeTween2 = FlxTween.tween(smoke2, { alpha: 0.7 }, dur, { ease: FlxEase.expoInOut });
+
+            smoke1.velocity.x = FlxG.random.float(35, 42);
+            smoke2.velocity.x = FlxG.random.float(-42, -35);
+        }
+    }
+
+    function getChar(who:String) {
+        switch (who) {
+            case "dad":       return PlayState.instance.currentStage.getDad();
+            case "boyfriend": return PlayState.instance.currentStage.getBoyfriend();
+            case "gf":        return PlayState.instance.currentStage.getGirlfriend();
+            default:          return null;
+        }
+    }
+
+    function onSongRetry(event) { super.onSongRetry(event); brightenAll(); cleanup(); }
+    function onDestroy(event)   { super.onDestroy(event);   brightenAll(); cleanup(); }
+    function onGameOver(event)  { super.onGameOver(event);  brightenAll(); cleanup(); }
+    function onSongEnd(event)   { super.onSongEnd(event);   brightenAll(); cleanup(); }
+
+    function cleanup() {
+        if (smokeTween1 != null) { smokeTween1.cancel(); smokeTween1 = null; }
+        if (smokeTween2 != null) { smokeTween2.cancel(); smokeTween2 = null; }
+        if (spotTween != null) { spotTween.cancel(); spotTween = null; }
+        stageIsDark = false;
+        currentWho  = "";
+        for (s in [spotLight, smoke1, smoke2])
+            if (s != null) s.destroy();
+        spotLight = null;
+        smoke1    = null;
+        smoke2    = null;
+    }
+}
+
+//CODE BY BIT https://www.youtube.com/@mq-bit - https://gamebanana.com/members/4724027

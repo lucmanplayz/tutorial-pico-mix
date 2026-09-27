@@ -1,0 +1,23 @@
+
+import funkin.play.event.SongEvent;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+import flixel.FlxG;
+import funkin.play.PlayState;
+import funkin.Conductor;
+import funkin.modding.module.Module;
+import funkin.modding.module.ModuleHandler;
+
+class BloomEvent extends SongEvent {
+    public function new() { super("Bloom"); }
+    override function getTitle() { return "Bloom"; }
+    override function handleEvent() {}
+
+    override function getEventSchema()
+    {
+        return [
+            { name: "v1", title: "Duration", defaultValue: 8, step:0.5, type: "float" },
+            { name: "v2", title: "Amt", defaultValue: 0.5, step:0.25, type: "float" }
+        ];
+    }
+}
