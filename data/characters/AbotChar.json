@@ -1,0 +1,16 @@
+{
+  "version": "1.0.0",
+  "name": "AbotChar",
+  "assetPath": "shared:characters/AbotChar",
+  "startingAnimation": "idle",
+  "renderType": "animateatlas",
+  "offsets": [4, -89],
+  "cameraOffsets": [-4, 34],
+  "animations": [
+    {
+      "name": "idle",
+      "prefix": "idle",
+      "frameIndices": []
+    }
+  ]
+}

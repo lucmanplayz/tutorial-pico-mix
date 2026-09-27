@@ -1,0 +1,47 @@
+{
+ "version": "2.2.4",
+ "songName": "Tutorial... Cat Mix?",
+ "artist": "RixFX + Chibisprinklez + Fab-BeatZ",
+ "charter": "Bit",
+ "offsets": {
+  "instrumental": 0
+ },
+ "playData": {
+  "difficulties": [
+   "easy",
+   "normal",
+   "hard"
+  ],
+  "characters": {
+   "player": "oiia",
+   "girlfriend": "AbotChar",
+   "opponent": "nene2",
+   "opponentVocals": [
+    "nene2"
+   ],
+   "playerVocals": [
+    "oiia"
+   ]
+  },
+  "stage": "mainStageErect",
+  "noteStyle": "funkin",
+  "ratings": {
+   "easy": 6,
+   "normal": 8,
+   "hard": 10,
+   "": 0
+  },
+  "album": "catxneneidk",
+  "previewStart": 0.548476995961973,
+  "previewEnd": 0.980894089218149
+ },
+ "generatedBy": "Friday Night Funkin' - v0.8.4",
+ "timeChanges": [
+  {
+   "t": 0,
+   "b": 0,
+   "bpm": 110,
+   "bt": [4, 4, 4, 4]
+  }
+ ]
+}

@@ -1,0 +1,47 @@
+{
+ "version": "2.2.4",
+ "songName": "Tutorial (Pico MIX) EXTENDED",
+ "artist": "RixFX + Chibisprinklez + JakeTheArtist",
+ "charter": "Bit",
+ "offsets": {
+  "instrumental": 0
+ },
+ "playData": {
+  "difficulties": [
+   "easy",
+   "normal",
+   "hard"
+  ],
+  "characters": {
+   "player": "pico-retake-player",
+   "girlfriend": "AbotChar",
+   "opponent": "nene2",
+   "opponentVocals": [
+    "nene2"
+   ],
+   "playerVocals": [
+    "pico-retake-player"
+   ]
+  },
+  "stage": "mainStageErect",
+  "noteStyle": "funkin",
+  "ratings": {
+   "easy": 6,
+   "normal": 8,
+   "hard": 10,
+   "": 0
+  },
+  "album": "picoxneneex",
+  "previewStart": 0.355033941516594,
+  "previewEnd": 0.637181409571633
+ },
+ "generatedBy": "Friday Night Funkin' - v0.8.4",
+ "timeChanges": [
+  {
+   "t": 0,
+   "b": 0,
+   "bpm": 110,
+   "bt": [4, 4, 4, 4]
+  }
+ ]
+}

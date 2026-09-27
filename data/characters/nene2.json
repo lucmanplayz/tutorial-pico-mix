@@ -1,0 +1,155 @@
+{
+	"renderType": "sparrow",
+	"version": "1.0.1",
+	"offsets": [100, 20],
+	"danceEvery": 2,
+	"scale": 0.9,
+	"name": "NENE Chibi",
+	"cameraOffsets": [
+		0,
+		60
+	],
+	"flipX": false,
+	"isPixel": false,
+	"singTime": 4,
+	"startingAnimation": "idle",
+	"healthIcon": {
+		"id": "nene",
+		"isPixel": false
+	},
+	"assetPath": "characters/NENE2",
+	"animations": [
+		{
+			"frameIndices": [],
+			"prefix": "idle",
+			"offsets": [
+				0,
+				0
+			],
+			"frameRate": 24,
+			"name": "idle",
+			"looped": false
+		},
+		{
+			"frameIndices": [],
+			"prefix": "singLEFT",
+			"offsets": [
+				74,
+				-19
+			],
+			"frameRate": 24,
+			"name": "singLEFT",
+			"looped": false
+		},
+		{
+			"frameIndices": [],
+			"prefix": "singDOWN",
+			"offsets": [
+				10,
+				-118
+			],
+			"frameRate": 24,
+			"name": "singDOWN",
+			"looped": false
+		},
+		{
+			"frameIndices": [],
+			"prefix": "singUP",
+			"offsets": [
+				20,
+				36
+			],
+			"frameRate": 24,
+			"name": "singUP",
+			"looped": true
+		},
+		{
+			"frameIndices": [],
+			"prefix": "singRIGHT",
+			"offsets": [
+				-5,
+				-51
+			],
+			"frameRate": 24,
+			"name": "singRIGHT",
+			"looped": false
+		},
+		{
+			"frameIndices": [],
+			"prefix": "attack",
+			"offsets": [
+				76,
+				-21
+			],
+			"frameRate": 24,
+			"name": "attack",
+			"looped": false
+		},
+		{
+			"frameIndices": [],
+			"prefix": "dodge",
+			"offsets": [
+				95,
+				7
+			],
+			"frameRate": 24,
+			"name": "dodge",
+			"looped": false
+		},
+		{
+			"frameIndices": [],
+			"prefix": "hey",
+			"offsets": [
+				83,
+				-5
+			],
+			"frameRate": 24,
+			"name": "hey",
+			"looped": false
+		},
+		{
+			"frameIndices": [],
+			"prefix": "giggle",
+			"offsets": [
+				-3,
+				0
+			],
+			"frameRate": 24,
+			"name": "giggle",
+			"looped": false
+		},
+		{
+			"frameIndices": [],
+			"prefix": "preattack",
+			"offsets": [
+				66,
+				-23
+			],
+			"frameRate": 24,
+			"name": "preattack",
+			"looped": false
+		},
+		{
+			"frameIndices": [],
+			"prefix": "hurt",
+			"offsets": [
+				123,
+				-49
+			],
+			"frameRate": 24,
+			"name": "hurt",
+			"looped": false
+		},
+		{
+			"frameIndices": [],
+			"prefix": "angry",
+			"offsets": [
+				-3,
+				-7
+			],
+			"frameRate": 24,
+			"name": "angry",
+			"looped": false
+		}
+	]
+}

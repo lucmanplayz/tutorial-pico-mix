@@ -1,0 +1,51 @@
+{
+ "version": "2.2.4",
+ "songName": "Tutorial (Pico MIX)",
+ "artist": "RixFX + Chibisprinklez",
+ "charter": "Bit",
+ "offsets": {
+  "instrumental": -68
+ },
+ "playData": {
+  "songVariations": [
+   "pico"
+  ],
+  "difficulties": [
+   "easy",
+   "normal",
+   "hard"
+  ],
+  "characters": {
+   "player": "pico-retake-player",
+   "girlfriend": "AbotChar",
+   "opponent": "nene2",
+   "instrumental": "pico",
+   "opponentVocals": [
+    "nene2"
+   ],
+   "playerVocals": [
+    "pico-retake-player"
+   ]
+  },
+  "stage": "mainStageErect",
+  "noteStyle": "funkin",
+  "ratings": {
+   "easy": 4,
+   "normal": 6,
+   "hard": 9,
+   "": 0
+  },
+  "album": "picoxnene",
+  "previewStart": 0.548476995961973,
+  "previewEnd": 0.980894089218149
+ },
+ "generatedBy": "Friday Night Funkin' - v0.8.4",
+ "timeChanges": [
+  {
+   "t": 0,
+   "b": 0,
+   "bpm": 110,
+   "bt": [4, 4, 4, 4]
+  }
+ ]
+}

@@ -1,0 +1,46 @@
+{
+	"version": "1.0.0",
+	"titleAsset": "storymenu/titles/week1",
+	"props": [
+		{
+			"isPixel": false,
+			"danceEvery": 1,
+			"offsets": [
+				0,
+				0
+			],
+			"assetPath": "prop",
+			"alpha": 1,
+			"scale": 1,
+			"animations": [
+				{
+					"offsets": [
+						0,
+						0
+					],
+					"frameIndices": [],
+					"prefix": "",
+					"name": "idle",
+					"looped": false,
+					"flipX": false,
+					"flipY": false,
+					"frameRate": 24,
+					"assetPath": ""
+				}
+			]
+		}
+	],
+	"capsule": {
+		"offsets": [
+			0,
+			0
+		],
+		"name": "Oiiai"
+	},
+	"visible": false,
+	"songs": [
+		"tutorial-cat-mix"
+	],
+	"background": "#F9CF51",
+	"name": "Oiiai"
+}

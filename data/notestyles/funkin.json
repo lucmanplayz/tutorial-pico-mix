@@ -1,0 +1,210 @@
+{
+  "version": "1.1.0",
+  "name": "Funkin': AMTake - Base",
+  "author": "KerSive (and PurSnake's fixes)",
+  "fallback": null,
+  "assets": {
+    "note": {
+      "assetPath": "shared:noteamt/notes",
+      "scale": 0.7,
+      "data": {
+        "left": { "prefix": "purple" },
+        "down": { "prefix": "blue" },
+        "up": { "prefix": "green" },
+        "right": { "prefix": "red" }
+      }
+    },
+
+    "noteStrumline": {
+      "assetPath": "shared:noteamt/strums",
+      "scale": 0.7,
+      "offsets": [23, 26],
+      "data": {
+        "leftStatic": { "prefix": "LeftStatic" },
+        "leftPress": { "prefix": "left press" },
+        "leftConfirm": { "prefix": "left confirm" },
+        "leftConfirmHold": { "prefix": "left confirm" },
+
+        "downStatic": { "prefix": "DownStatic" },
+        "downPress": { "prefix": "down press" },
+        "downConfirm": { "prefix": "down confirm" },
+        "downConfirmHold": { "prefix": "down confirm" },
+
+        "upStatic": { "prefix": "UpStatic" },
+        "upPress": { "prefix": "up press" },
+        "upConfirm": { "prefix": "up confirm" },
+        "upConfirmHold": { "prefix": "up confirm" },
+
+        "rightStatic": { "prefix": "RightStatic" },
+        "rightPress": { "prefix": "right press" },
+        "rightConfirm": { "prefix": "right confirm" },
+        "rightConfirmHold": { "prefix": "right confirm" }
+      }
+    },
+
+    "holdNote": {
+      "assetPath": "shared:noteamt/note-holds",
+      "scale": 0.6,
+      "offsets": [3, -5],
+      "data": {}
+    },
+
+    "noteSplash": {
+      "assetPath": "shared:noteamt/noteSplashes",
+      "scale": 0.8,
+      "alpha": 0.7,
+      "offsets": [12, -25],
+      "data": {
+        "enabled": true,
+        "leftSplashes": [
+          { "prefix": "note splash purple 1" },
+          { "prefix": "note splash purple 2" }
+        ],
+        "downSplashes": [
+          { "prefix": "note splash blue 1" },
+          { "prefix": "note splash blue 2" }
+        ],
+        "upSplashes": [
+          { "prefix": "note splash green 1" },
+          { "prefix": "note splash green 2" }
+        ],
+        "rightSplashes": [
+          { "prefix": "note splash red 1" },
+          { "prefix": "note splash red 2" }
+        ]
+      }
+    },
+
+    "holdNoteCover": {
+      "assetPath": "",
+      "offsets": [0, 2],
+      "data": {
+        "enabled": true,
+        "left": {
+          "assetPath": "shared:holdCoverPurple",
+          "start": { "prefix": "holdCoverStartPurple" },
+          "hold": { "prefix": "holdCoverPurple" },
+          "end": { "prefix": "holdCoverEndPurple" }
+        },
+        "right": {
+          "assetPath": "shared:holdCoverRed",
+          "start": { "prefix": "holdCoverStartRed" },
+          "hold": { "prefix": "holdCoverRed" },
+          "end": { "prefix": "holdCoverEndRed" }
+        },
+        "up": {
+          "assetPath": "shared:holdCoverGreen",
+          "start": { "prefix": "holdCoverStartGreen" },
+          "hold": { "prefix": "holdCoverGreen" },
+          "end": { "prefix": "holdCoverEndGreen" }
+        },
+        "down": {
+          "assetPath": "shared:holdCoverBlue",
+          "start": { "prefix": "holdCoverStartBlue" },
+          "hold": { "prefix": "holdCoverBlue" },
+          "end": { "prefix": "holdCoverEndBlue" }
+        }
+      }
+    },
+    "countdownThree": {
+      "data": {
+        "audioPath": "shared:gameplay/countdown/funkin/introTHREE"
+      },
+      "assetPath": null
+    },
+    "countdownTwo": {
+      "data": {
+        "audioPath": "shared:gameplay/countdown/funkin/introTWO"
+      },
+      "assetPath": "shared:ui/countdown/funkin/ready",
+      "scale": 1.0,
+      "isPixel": false
+    },
+    "countdownOne": {
+      "data": {
+        "audioPath": "shared:gameplay/countdown/funkin/introONE"
+      },
+      "assetPath": "shared:ui/countdown/funkin/set",
+      "scale": 1.0,
+      "isPixel": false
+    },
+    "countdownGo": {
+      "data": {
+        "audioPath": "shared:gameplay/countdown/funkin/introGO"
+      },
+      "assetPath": "shared:ui/countdown/funkin/go",
+      "scale": 1.0,
+      "isPixel": false
+    },
+    "judgementSick": {
+      "assetPath": "default:ui/popup/funkin/sick",
+      "scale": 0.4,
+      "isPixel": false
+    },
+    "judgementGood": {
+      "assetPath": "default:ui/popup/funkin/good",
+      "scale": 0.4,
+      "isPixel": false
+    },
+    "judgementBad": {
+      "assetPath": "default:ui/popup/funkin/bad",
+      "scale": 0.4,
+      "isPixel": false
+    },
+    "judgementShit": {
+      "assetPath": "default:ui/popup/funkin/shit",
+      "scale": 0.4,
+      "isPixel": false
+    },
+    "comboNumber0": {
+      "assetPath": "default:ui/popup/funkin/num0",
+      "isPixel": false,
+      "scale": 0.3
+    },
+    "comboNumber1": {
+      "assetPath": "default:ui/popup/funkin/num1",
+      "isPixel": false,
+      "scale": 0.3
+    },
+    "comboNumber2": {
+      "assetPath": "default:ui/popup/funkin/num2",
+      "isPixel": false,
+      "scale": 0.3
+    },
+    "comboNumber3": {
+      "assetPath": "default:ui/popup/funkin/num3",
+      "isPixel": false,
+      "scale": 0.3
+    },
+    "comboNumber4": {
+      "assetPath": "default:ui/popup/funkin/num4",
+      "isPixel": false,
+      "scale": 0.3
+    },
+    "comboNumber5": {
+      "assetPath": "default:ui/popup/funkin/num5",
+      "isPixel": false,
+      "scale": 0.3
+    },
+    "comboNumber6": {
+      "assetPath": "default:ui/popup/funkin/num6",
+      "isPixel": false,
+      "scale": 0.3
+    },
+    "comboNumber7": {
+      "assetPath": "default:ui/popup/funkin/num7",
+      "isPixel": false,
+      "scale": 0.3
+    },
+    "comboNumber8": {
+      "assetPath": "default:ui/popup/funkin/num8",
+      "isPixel": false,
+      "scale": 0.3
+    },
+    "comboNumber9": {
+      "assetPath": "default:ui/popup/funkin/num9",
+      "isPixel": false,
+      "scale": 0.3
+    }
+  }
+}
